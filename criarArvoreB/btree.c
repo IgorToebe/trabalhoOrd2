@@ -188,7 +188,7 @@ int insere(int rrn_Pagina_Atual, char chave, int *pagina_filha_da_direita, int *
         {
             divide(chave_promovida2, pagina_filha_da_direita2, &pagina, chave_promovida, pagina_filha_da_direita, &novapag);
             escreve_pagina(rrn_Pagina_Atual, pagina);
-            escreve_pagina(pagina_filha_da_direita, novapag);
+            escreve_pagina(*pagina_filha_da_direita, novapag);
             return ComPromocao;
         }
     }
@@ -198,13 +198,13 @@ int insere(int rrn_Pagina_Atual, char chave, int *pagina_filha_da_direita, int *
 
 //--------------Funções Principais BTREE--------------------//
 
-iint gerenciador(char *Arquivo)
+int gerenciador(char *Arquivo)
 {
     FILE *entrada;
     PAG novaPagina;
     FILE *Btree;
     int rrn_Pagina_Atual, aux, filho_d_pro, chave_promovida, rrn;
-    int chave;
+    char chave, chave2;
     
 
     if ((entrada = fopen(Arquivo, "r")) == NULL)
@@ -216,7 +216,6 @@ iint gerenciador(char *Arquivo)
 
     if ((Btree = fopen("Btree.dat", "r+b")))
     {
-        
         rrn_Pagina_Atual = fgetc(Btree);
     }
     else
@@ -224,13 +223,20 @@ iint gerenciador(char *Arquivo)
         
         Btree = fopen("Btree.dat", "w+b");
         rrn_Pagina_Atual = 0;
-        fwrite(&rrn_Pagina_Atual, sizeof(int), 1, Btree);
+        fwrite(&rrn_Pagina_Atual, sizeof(rrn_Pagina_Atual), 1, Btree);
         Inicializa_pagina(&novaPagina);
         escreve_pagina(rrn_Pagina_Atual, novaPagina);
     }
 
-    fscanf(entrada, "%i", &chave);
-    printf("%d", chave);
+    while (chave != *delimitador)
+    {
+        chave2 = fgetc(entrada);
+        chave = chave2;
+        //printf("%c", chave);
+    }
+
+    //fscanf(entrada, "%i", &chave);
+    printf("%c", chave);
     int chaveTeste;
 
     // while (fscanf(entrada, "%i|", &chaveTeste) != EOF)
