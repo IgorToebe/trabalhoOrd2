@@ -7,7 +7,7 @@ typedef struct
 {
 
     int quantidadeDeChaves;
-    char chave[MAXCHAVE];
+    int chave[MAXCHAVE];
     int filhos[MAXCHAVE + 1];
 } PAG;
 
@@ -142,12 +142,14 @@ int divide(int chave, int filho_d, PAG *pag, int *chave_pro, int *filho_d_pro, P
     novapag->filhos[novapag->quantidadeDeChaves] = pagina_auxiliar.filhos[i];
 }
 
-int insere(int rrn_Pagina_Atual, char chave, int *pagina_filha_da_direita, int *chave_promovida)
+int insere(int rrn_Pagina_Atual, int chave, int *pagina_filha_da_direita, int *chave_promovida)
 {
 
     PAG pagina, novapag;
     int result = 0;
     int pos = 0;
+    int pagina_filha_da_direita2 = *pagina_filha_da_direita;
+    int chave_promovida2 = *chave_promovida;
 
     if (rrn_Pagina_Atual == -1)
     {
@@ -166,32 +168,31 @@ int insere(int rrn_Pagina_Atual, char chave, int *pagina_filha_da_direita, int *
         printf("\nChave duplicada");
         return erro;
     }
+    
+    int retorno = insere(pagina.filhos[pos], chave, &pagina_filha_da_direita2, &chave_promovida2);// esta dando falha de segmentação nesta linha
 
-    int pagina_filha_da_direita2, chave_promovida2;
-    int retorno = insere(pagina.filhos[pos], chave, &pagina_filha_da_direita2, &chave_promovida2);
+    // if (retorno == ComPromocao || retorno == erro)
+    // {
 
-    if (retorno == ComPromocao || retorno == erro)
-    {
+    //     return retorno;
+    // }
+    // else
+    // {
 
-        return retorno;
-    }
-    else
-    {
-
-        if (pagina.quantidadeDeChaves <= qtdDeCampos - 1)
-        {
-            insere_na_pagina(chave_promovida2, pagina_filha_da_direita2, &pagina);
-            escreve_pagina(rrn_Pagina_Atual, pagina);
-            return semPromocao;
-        }
-        else
-        {
-            divide(chave_promovida2, pagina_filha_da_direita2, &pagina, chave_promovida, pagina_filha_da_direita, &novapag);
-            escreve_pagina(rrn_Pagina_Atual, pagina);
-            escreve_pagina(*pagina_filha_da_direita, novapag);
-            return ComPromocao;
-        }
-    }
+    //     if (pagina.quantidadeDeChaves <= qtdDeCampos - 1)
+    //     {
+    //         insere_na_pagina(chave_promovida2, pagina_filha_da_direita2, &pagina);
+    //         escreve_pagina(rrn_Pagina_Atual, pagina);
+    //         return semPromocao;
+    //     }
+    //     else
+    //     {
+    //         divide(chave_promovida2, pagina_filha_da_direita2, &pagina, chave_promovida, pagina_filha_da_direita, &novapag);
+    //         escreve_pagina(rrn_Pagina_Atual, pagina);
+    //         escreve_pagina(*pagina_filha_da_direita, novapag);
+    //         return ComPromocao;
+    //     }
+    // }
 }
 
 //--------------FIM Operações Principais--------------------//
@@ -204,7 +205,7 @@ int gerenciador(char *Arquivo)
     PAG novaPagina;
     FILE *Btree;
     int rrn_Pagina_Atual, aux, filho_d_pro, chave_promovida, rrn;
-    char chave, chave2;
+    char chave, chave2, seek = 0;
     
 
     if ((entrada = fopen(Arquivo, "r")) == NULL)
@@ -228,35 +229,26 @@ int gerenciador(char *Arquivo)
         escreve_pagina(rrn_Pagina_Atual, novaPagina);
     }
 
-    while (chave != *delimitador)
-    {
-        chave2 = fgetc(entrada);
-        chave = chave2;
-        //printf("%c", chave);
-    }
-
-    //fscanf(entrada, "%i", &chave);
-    printf("%c", chave);
+    fscanf(entrada, "%i", &chave);
     int chaveTeste;
-
-    // while (fscanf(entrada, "%i|", &chaveTeste) != EOF)
-    // {
-
-    //     printf("%i", chaveTeste);
-    //     if (insere(rrn_Pagina_Atual, chave, &filho_d_pro, &chave_promovida) == ComPromocao)
-    //     {
-    //         Inicializa_pagina(&novaPagina);
-    //         novaPagina.chave[0] = chave_promovida;
-    //         novaPagina.filhos[0] = rrn_Pagina_Atual;
-    //         novaPagina.filhos[1] = filho_d_pro;
-    //         escreve_pagina(rrn_Pagina_Atual, novaPagina);
-    //         rrn = RRN_novapag();
-    //         rrn_Pagina_Atual = rrn;
-    //     }
-        fseek(entrada,sizeof(int)+1,SEEK_CUR);
+    while (fscanf(entrada, "%i|", &chaveTeste) != EOF)
+    {
+        if (insere(rrn_Pagina_Atual, chave, &filho_d_pro, &chave_promovida) == ComPromocao)
+        {
+            // Inicializa_pagina(&novaPagina);
+            // novaPagina.chave[0] = chave_promovida;
+            // novaPagina.filhos[0] = rrn_Pagina_Atual;
+            // novaPagina.filhos[1] = filho_d_pro;
+            // escreve_pagina(rrn_Pagina_Atual, novaPagina);
+            // rrn = RRN_novapag();
+            // rrn_Pagina_Atual = rrn;
+        }
+        if (chave >= 10){ seek += 3; }
+        else { seek += 2; }
+    
+        fseek(entrada,seek,SEEK_SET);
         fscanf(entrada, "%i", &chave);
-        printf("%d", chave);
-    // }
+    }
     // fwrite(&rrn_Pagina_Atual, sizeof(int), 1, Btree);
     // fclose(Btree);
 }
