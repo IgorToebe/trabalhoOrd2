@@ -144,36 +144,40 @@ int divide(int chave, int filho_d, PAG *pag, int *chave_pro, int *filho_d_pro, P
 
 int insere(int rrn_Pagina_Atual, int chave, int *pagina_filha_da_direita, int *chave_promovida)
 {
-
     PAG pagina, novapag;
     int result;
     int PosicaoChave;
-    int pagina_filha_da_direita2;
-    int chave_promovida2;
+    int pagina_filha_da_direita2 = *pagina_filha_da_direita;
+    int chave_promovida2 = *chave_promovida;
+    
 
+    
     if (rrn_Pagina_Atual == -1)
     {
+        printf("com promoção");
         *chave_promovida = chave;
         *pagina_filha_da_direita = -1;
         return ComPromocao;
     }
     else
     {
+        
         le_pagina(rrn_Pagina_Atual, &pagina);
         result = busca_na_pagina(chave, pagina, &PosicaoChave);
     }
 
     if (result == encontrado)
     {
+        printf("com erro");
         printf("\nChave duplicada");
         return erro;
     }
-    printf("%i", chave);
     int retorno = insere(pagina.filhos[PosicaoChave], chave, &pagina_filha_da_direita2, &chave_promovida2);// esta dando falha de segmentação nesta linha
+    printf("%i", retorno);
 
     if (retorno == semPromocao || retorno == erro)
     {
-
+        printf("erro");
         return retorno;
     }
     else
@@ -181,12 +185,14 @@ int insere(int rrn_Pagina_Atual, int chave, int *pagina_filha_da_direita, int *c
         
         if (pagina.quantidadeDeChaves <= qtdDeCampos - 1)
         {
+            printf("insere");
             insere_na_pagina(chave_promovida2, pagina_filha_da_direita2, &pagina);
             escreve_pagina(rrn_Pagina_Atual, pagina);
             return semPromocao;
         }
         else
         {
+            printf("divide");
             divide(chave_promovida2, pagina_filha_da_direita2, &pagina, chave_promovida, pagina_filha_da_direita, &novapag);
             escreve_pagina(rrn_Pagina_Atual, pagina);
             escreve_pagina(*pagina_filha_da_direita, novapag);
@@ -218,6 +224,7 @@ int gerenciador(char *Arquivo)
     if ((Btree = fopen("Btree.dat", "r+b")))
     {
         rrn_Pagina_Atual = fgetc(Btree);
+        
     }
     else
     {
@@ -233,7 +240,7 @@ int gerenciador(char *Arquivo)
     int chaveTeste;
     while (fscanf(entrada, "%i|", &chaveTeste) != EOF)
     {
-        
+       
         if (insere(rrn_Pagina_Atual, chave, &filho_d_pro, &chave_promovida) == ComPromocao)
         {
             Inicializa_pagina(&novaPagina);
@@ -243,6 +250,7 @@ int gerenciador(char *Arquivo)
             escreve_pagina(rrn_Pagina_Atual, novaPagina);
             rrn = RRN_novapag();
             rrn_Pagina_Atual = rrn;
+             
         }
         if (chave >= 10){ seek += 3; }
         else { seek += 2; }
