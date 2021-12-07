@@ -59,7 +59,7 @@ int Inicializa_pagina(PAG *pag)
 
     for (int i = 0; i <= qtdDeCampos - 1; i++)
     {
-        pag->chave[i] = ' ';
+        pag->chave[i] = -1;
         pag->filhos[i] = -1;
     }
     pag->filhos[qtdDeCampos] = -1;
@@ -150,7 +150,6 @@ int insere(int rrn_Pagina_Atual, int chave, int *pagina_filha_da_direita, int *c
     int pagina_filha_da_direita2 = *pagina_filha_da_direita;
     int chave_promovida2 = *chave_promovida;
     
-
     
     if (rrn_Pagina_Atual == -1)
     {
@@ -168,7 +167,6 @@ int insere(int rrn_Pagina_Atual, int chave, int *pagina_filha_da_direita, int *c
 
     if (result == encontrado)
     {
-        printf("com erro");
         printf("\nChave duplicada");
         return erro;
     }
@@ -198,6 +196,7 @@ int insere(int rrn_Pagina_Atual, int chave, int *pagina_filha_da_direita, int *c
             escreve_pagina(*pagina_filha_da_direita, novapag);
             return ComPromocao;
         }
+        printf("teste");
     }
 }
 
@@ -248,8 +247,7 @@ int gerenciador(char *Arquivo)
             novaPagina.filhos[0] = rrn_Pagina_Atual;
             novaPagina.filhos[1] = filho_d_pro;
             escreve_pagina(rrn_Pagina_Atual, novaPagina);
-            rrn = RRN_novapag();
-            rrn_Pagina_Atual = rrn;
+            rrn_Pagina_Atual = RRN_novapag();
              
         }
         if (chave >= 10){ seek += 3; }
@@ -263,6 +261,54 @@ int gerenciador(char *Arquivo)
 }
 void impressaoArvoreB(char *arquivo)
 {
+    FILE *Btree;
+    PAG pagina[MAXCHAVE];
+
+    if ((Btree = fopen("Btree.dat", "rb")) == NULL)
+    {
+
+        fprintf(stderr, "Erro ao abrir o arquivo %s\n", Btree);
+    }
+
+    fseek(Btree, 0, SEEK_END);
+    int TamanhoBetree = ftell(Btree);
+    int QuantidadePaginas = TamanhoBetree / sizeof(pagina);
+
+    fseek(Btree, sizeof(int), SEEK_SET);
+    fread(pagina, sizeof(pagina), QuantidadePaginas, Btree);
+
+    int i = 0, j = 0;
+
+    int PagRaiz = -1;
+
+    fread(&PagRaiz, sizeof(PagRaiz), 1, Btree);
+    for (i = 0; i < QuantidadePaginas; ++i) {
+        if (i == PagRaiz) {
+            printf(" - - - - - - Pagina Raiz - - - - - - \n");
+        }
+
+        printf("Pagina %d\n", i);
+
+        printf("Chaves: ");
+        for (j = 0; j < pagina[i].quantidadeDeChaves - 1; ++j) {
+            printf("%d | ", pagina[i].chave[j]);
+        }
+
+        printf("Filhos: ");
+        for (j = 0; j < pagina[i].quantidadeDeChaves; ++j) {
+            printf("%d | ", pagina[i].filhos[j]);
+        }
+        printf("%d\n", pagina[i].filhos[j]);
+
+        if (i == PagRaiz) {
+            printf(" - - - - - - - - - - - - - - - - - - \n");
+        }
+
+        printf("\n");
+    }
+
+    fclose(Btree);
+
 }
 
 void impressaoChavesOrdemCrescente(char *arquivo)
